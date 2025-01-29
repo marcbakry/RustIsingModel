@@ -1,10 +1,16 @@
 //! This modules implements a linear circular index which loops over itself when the
 //! upper or lower bound is overshot.
 
-/// The CircularIndex structure holds a lower bound and an upper bound.
+/// The `CircularIndex`` structure holds a lower bound and an upper bound.
 pub struct CircularIndex {
     lower_bound: usize,
     upper_bound: usize,
+}
+
+/// The `Circular2dIndex` structure is the 2d-grid equivalent of `CircularIndex`.
+pub struct Circular2dIndex {
+    i_index: CircularIndex,
+    j_index: CircularIndex,
 }
 
 impl CircularIndex {
@@ -44,6 +50,38 @@ impl CircularIndex {
     }
 }
 
+impl Circular2dIndex {
+    /// Builder for a `Circular2dIndex`.
+    pub fn new(lb_i: usize, ub_i: usize, lb_j: usize, ub_j: usize) -> Self {
+        Self { i_index: CircularIndex::new(lb_i, ub_i), j_index: CircularIndex::new(lb_j, ub_j) }
+    }
+
+    /// Get index.
+    pub fn at(&self, i: usize, j: usize) -> (usize,usize) {
+        (self.i_index.at(i), self.j_index.at(j))
+    }
+
+    /// Get next on first dimension.
+    pub fn next_i(&self, i: usize, j: usize) -> (usize,usize) {
+        (self.i_index.next(i),self.j_index.at(j))
+    }
+
+    /// Get previous index on first dimention.
+    pub fn previous_i(&self, i: usize, j: usize) -> (usize,usize) {
+        (self.i_index.previous(i), self.j_index.at(j))
+    }
+
+    /// Get next index on second dimension.
+    pub fn next_j(&self, i: usize, j: usize) -> (usize,usize) {
+        (self.i_index.at(i), self.j_index.next(j))
+    }
+
+    /// Get previous index on second dimension.
+    pub fn previous_j(&self, i: usize, j: usize) -> (usize,usize) {
+        (self.i_index.at(i), self.j_index.previous(j))
+    }
+}
+
 #[cfg(test)]
 mod circular_index_tests {
     use super::*;
@@ -80,5 +118,24 @@ mod circular_index_tests {
         assert_eq!(ci.previous(4),3);
         assert_eq!(ci.next(5),2);
         assert_eq!(ci.previous(2),5);
+    }
+}
+
+#[cfg(test)]
+mod circular_2d_index_tests {
+    use super::*;
+
+    #[test]
+    fn circular_2d_index_test() {
+        // 
+        let (lb_i,ub_i,lb_j,ub_j) = (2,3,1,9);
+        let ci2d = Circular2dIndex::new(lb_i, ub_i, lb_j, ub_j);
+        // 
+        assert_eq!(ci2d.at(2, 4),(2,4));
+        assert_eq!(ci2d.next_i(2, 4),(3,4));
+        assert_eq!(ci2d.next_i(3, 4),(2,4));
+        assert_eq!(ci2d.previous_i(2, 1),(3,1));
+        assert_eq!(ci2d.next_j(3, 9),(3,1));
+        assert_eq!(ci2d.previous_j(2, 1),(2,9));
     }
 }
