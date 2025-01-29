@@ -1,7 +1,7 @@
 //! This modules implements a linear circular index which loops over itself when the
 //! upper or lower bound is overshot.
 
-/// The `CircularIndex`` structure holds a lower bound and an upper bound.
+/// The `CircularIndex` structure holds a lower bound and an upper bound.
 pub struct CircularIndex {
     lower_bound: usize,
     upper_bound: usize,
